@@ -7,6 +7,7 @@ const TelegramBot = require("node-telegram-bot-api");
 // ---------- الإعدادات ----------
 const TOKEN = process.env.TELEGRAM_BOT_TOKEN; // خاصك تعطيه القيمة (شوف README)
 const PORT = process.env.PORT || 3000;
+const DASHBOARD_PASSWORD = process.env.DASHBOARD_PASSWORD || "shahd2026"; // بدلها فـ Environment Variables
 const DATA_FILE = path.join(__dirname, "appointments.json");
 
 if (!TOKEN) {
@@ -150,6 +151,49 @@ bot.on("message", (msg) => {
 // ---------- API باش الصفحة تقرا/تزيد المواعيد ----------
 const app = express();
 app.use(express.json());
+
+// --- حماية بسيطة بكلمة سر (كوكي) ---
+function parseCookies(req) {
+  const header = req.headers.cookie || "";
+  const out = {};
+  header.split(";").forEach((c) => {
+    const [k, ...v] = c.trim().split("=");
+    if (k) out[k] = decodeURIComponent(v.join("="));
+  });
+  return out;
+}
+
+app.get("/login", (req, res) => {
+  res.type("html").send(`<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Connexion — SHAHD AUTOMOTIVE</title>
+  <style>body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;background:#090b0d;font-family:Arial,sans-serif}.box{background:#121518;border:1px solid #292e33;border-radius:14px;padding:28px;width:min(340px,90%)}h1{color:#fff;font-size:20px;margin:0 0 18px}input{width:100%;box-sizing:border-box;background:#0b0e10;border:1px solid #30363b;color:#fff;border-radius:8px;padding:12px;margin-bottom:12px;outline:none}button{width:100%;background:#ef2029;border:0;color:#fff;padding:13px;border-radius:8px;font-weight:700}
+  .err{color:#ff6b6b;font-size:13px;margin-bottom:10px}</style></head><body>
+  <form class="box" method="POST" action="/login">
+    <h1>🔒 SHAHD AUTOMOTIVE</h1>
+    ${req.query.err ? '<div class="err">كلمة السر خاطئة</div>' : ""}
+    <input type="password" name="password" placeholder="كلمة السر" autofocus required>
+    <button type="submit">دخول</button>
+  </form></body></html>`);
+});
+
+app.post("/login", express.urlencoded({ extended: true }), (req, res) => {
+  if (req.body.password === DASHBOARD_PASSWORD) {
+    res.setHeader(
+      "Set-Cookie",
+      `auth=${encodeURIComponent(DASHBOARD_PASSWORD)}; HttpOnly; Path=/; Max-Age=2592000`
+    );
+    return res.redirect("/");
+  }
+  res.redirect("/login?err=1");
+});
+
+app.use((req, res, next) => {
+  if (req.path === "/login") return next();
+  const cookies = parseCookies(req);
+  if (cookies.auth === DASHBOARD_PASSWORD) return next();
+  if (req.path.startsWith("/api/")) return res.status(401).json({ error: "غير مسموح" });
+  return res.redirect("/login");
+});
+
 app.use(express.static(path.join(__dirname, "public")));
 
 app.get("/api/appointments", (req, res) => {
