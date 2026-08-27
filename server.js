@@ -140,7 +140,7 @@ function setEmployeeCookie(req, res, token) {
 function clearEmployeeCookie(req, res) {
   const isHttps = req.secure || req.headers["x-forwarded-proto"] === "https";
   const secure = isHttps ? "; Secure" : "";
-  res.setHeader("Set-Cookie", `employee_session=; HttpOnly; Path=/; SameSite=Lax; Max-Age=0; Priority=High${secure}`);
+  res.setHeader("Set-Cookie", `employee_session=; HttpOnly; Path=/; SameSite=None; Secure; Max-Age=0; Priority=High${secure}`);
 }
 
 // ---------- تخزين الفواتير ----------
