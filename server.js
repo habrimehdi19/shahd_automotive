@@ -131,14 +131,15 @@ function getEmployeeFromRequest(req) {
   if (!payload) return null;
   return employees.find(e => Number(e.id) === Number(payload.employeeId)) || null;
 }
+
 function setEmployeeCookie(req, res, token) {
-  // Railway كيدوز HTTPS عبر proxy؛ كنستعمل Secure غير ملي الطلب فعلاً HTTPS.
   const isHttps = req.secure || req.headers["x-forwarded-proto"] === "https";
   const secure = isHttps ? "; Secure" : "";
   res.setHeader(
-  "Set-Cookie",
-  `employee_session=${encodeURIComponent(token)}; HttpOnly; Path=/; SameSite=None; Secure; Max-Age=86400; Priority=High`
-);
+    "Set-Cookie",
+    `employee_session=${encodeURIComponent(token)}; HttpOnly; Path=/; SameSite=Lax; Max-Age=86400; Priority=High${secure}`
+  );
+}
 function clearEmployeeCookie(req, res) {
   const isHttps = req.secure || req.headers["x-forwarded-proto"] === "https";
   const secure = isHttps ? "; Secure" : "";
