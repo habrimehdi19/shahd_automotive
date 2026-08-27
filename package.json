@@ -1,0 +1,16 @@
+{
+  "name": "shahd-automotive-bot",
+  "version": "1.0.0",
+  "description": "SHAHD AUTOMOTIVE - Dashboard + Telegram Bot",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "node-telegram-bot-api": "^0.66.0",
+    "pdfkit": "^0.15.0",
+    "multer": "^1.4.5-lts.1",
+    "twilio": "^5.3.0"
+  }
+}
