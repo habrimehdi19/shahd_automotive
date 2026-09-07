@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MR GARAGE</title>
+<script src="/i18n.js"></script>
+<style>
+:root{--bg:#090b0d;--panel:#121518;--panel2:#171b1f;--line:#292e33;--red:#ef2029;--red2:#b9141c;--text:#f4f5f6;--muted:#9ca3aa;--green:#25c66b;--blue:#28a9ff;--yellow:#f4b51b}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,Segoe UI,Arial,sans-serif}
+button,input,select,textarea{font:inherit}button{cursor:pointer}
+.app{display:flex;min-height:100vh}.sidebar{width:220px;background:#0d1012;border-right:1px solid var(--line);padding:20px 14px;position:fixed;inset:0 auto 0 0}
+.logo{display:flex;justify-content:center;padding:5px 0 24px}.logo img{width:150px;height:150px;object-fit:cover;border-radius:10px;background:#000}
+.nav{display:grid;gap:6px}.nav button{border:0;background:transparent;color:#d9dde0;text-align:left;padding:13px 12px;border-radius:8px;display:flex;gap:12px;align-items:center}.nav button:hover,.nav button.active{background:#271315;color:#ff3038}.nav i{width:22px;text-align:center;font-style:normal}.logout{position:absolute;bottom:20px;left:14px;right:14px;border:1px solid #7d1b20;background:transparent;color:#ff3a42;padding:12px;border-radius:8px}
+main{margin-left:220px;width:calc(100% - 220px);padding:28px;max-width:1700px}.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px}.title h1{margin:0;font-size:28px}.title p{color:var(--muted);margin:5px 0 0}.top-actions{display:flex;gap:10px;align-items:center}.iconbtn{background:var(--panel);border:1px solid var(--line);color:#fff;border-radius:9px;padding:10px 13px}.user{display:flex;gap:10px;align-items:center}.avatar{width:38px;height:38px;border-radius:50%;background:var(--red);display:grid;place-items:center;font-weight:700}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.stat,.panel{background:linear-gradient(145deg,#15191d,#101316);border:1px solid var(--line);border-radius:12px}.stat{padding:18px}.stat small{color:var(--muted);text-transform:uppercase}.stat strong{display:block;font-size:28px;margin:7px 0}.up{color:var(--green);font-size:12px}
+.grid{display:grid;grid-template-columns:1.7fr .95fr;gap:14px;margin-top:14px}.panel{padding:16px}.panel h3{margin:0 0 15px;font-size:15px;border-left:3px solid var(--red);padding-left:9px}.row{display:grid;grid-template-columns:65px 1fr 1fr 95px 25px;gap:10px;align-items:center;padding:13px 6px;border-top:1px solid #24292d}.row:first-of-type{border-top:0}.time{color:#ff3038;font-weight:700}.muted{color:var(--muted);font-size:12px}.badge{justify-self:end;padding:5px 9px;border-radius:6px;font-size:11px;background:#123820;color:#49d884}.badge.blue{background:#102e43;color:#51b9ff}.badge.yellow{background:#3a2d0b;color:#f7c63d}
+.slots{display:grid;gap:9px}.slot{display:flex;justify-content:space-between;padding:12px;border:1px solid #2a3035;border-radius:8px}.available{color:var(--green)}.limited{color:var(--yellow)}.primary{width:100%;background:var(--red);border:0;color:#fff;padding:13px;border-radius:8px;font-weight:700;margin-top:10px}.primary:hover{background:#ff3038}
+.bottomgrid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-top:14px}.chart{height:150px;display:flex;align-items:end;gap:12px;padding:10px}.bar{flex:1;background:var(--red);border-radius:5px 5px 0 0;min-height:18px}.bar:nth-child(2){height:70%;background:#238ce0}.bar:nth-child(3){height:48%;background:#22bd65}.bar:nth-child(4){height:38%;background:#f1b51d}.bar:nth-child(5){height:28%;background:#8c59db}.quick{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;margin-top:14px;overflow:hidden}.quick button{padding:17px;background:var(--panel);border:1px solid var(--line);color:#fff;text-align:left}.quick b{display:block;margin-bottom:5px}.quick span{color:var(--muted);font-size:12px}
+.view{display:none}.view.active{display:block}.table{width:100%;border-collapse:collapse}.table th,.table td{text-align:left;padding:12px;border-bottom:1px solid var(--line);font-size:13px}.table th{color:var(--muted);font-weight:500}
+.modal{position:fixed;inset:0;background:#000a;display:none;align-items:center;justify-content:center;padding:20px;z-index:10}.modal.show{display:flex}.modalbox{width:min(620px,100%);background:#111519;border:1px solid #343a40;border-radius:14px;padding:22px;box-shadow:0 20px 70px #000}.modalhead{display:flex;justify-content:space-between}.close{background:none;border:0;color:#fff;font-size:24px}.formgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.field{display:grid;gap:6px}.field.full{grid-column:1/-1}.field label{font-size:12px;color:var(--muted)}.field input,.field select,.field textarea{background:#0b0e10;border:1px solid #30363b;color:#fff;border-radius:8px;padding:11px;outline:none}.field textarea{min-height:90px;resize:vertical}
+.toast{position:fixed;right:22px;bottom:22px;background:#17251c;border:1px solid #2c7e4c;color:#b8f4ce;padding:13px 17px;border-radius:9px;display:none;z-index:20}.toast.show{display:block}
+#langSwitch{background:var(--panel);border:1px solid var(--line);color:#fff;border-radius:9px;padding:10px 8px}
+@media(max-width:1050px){.stats{grid-template-columns:repeat(2,1fr)}.grid,.bottomgrid{grid-template-columns:1fr}.sidebar{width:75px}.logo img{width:50px;height:50px}.nav span,.logout span{display:none}main{margin-left:75px;width:calc(100% - 75px)}.quick{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:650px){main{padding:15px}.stats{grid-template-columns:1fr}.row{grid-template-columns:55px 1fr 80px}.row>div:nth-child(3),.row>div:last-child{display:none}.formgrid{grid-template-columns:1fr}.field.full{grid-column:auto}.quick{grid-template-columns:1fr}.top{align-items:flex-start}.top-actions .iconbtn{display:none}}
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="sidebar">
+  <div class="logo"><img id="logo" alt="Logo entreprise"></div>
+  <nav class="nav">
+    <button class="active" data-view="dashboard"><i>⌂</i><span data-i18n="nav_dashboard">Tableau de bord</span></button>
+    <button data-view="appointments"><i>▣</i><span data-i18n="nav_appointments">Rendez-vous</span></button>
+    <button data-view="agenda"><i>▦</i><span data-i18n="nav_agenda">Agenda</span></button>
+    <button data-view="clients"><i>♙</i><span data-i18n="nav_clients">Clients</span></button>
+    <button data-view="vehicles"><i>▱</i><span data-i18n="nav_vehicles">Véhicules</span></button>
+    <button data-view="services"><i>⚙</i><span data-i18n="nav_services">Services</span></button>
+    <button data-view="repairs"><i>✓</i><span data-i18n="nav_repairs">Réparations</span></button>
+    <button data-view="invoices"><i>▤</i><span data-i18n="nav_invoices">Factures</span></button>
+    <button data-view="stock"><i>□</i><span data-i18n="nav_stock">Stock</span></button>
+    <button data-view="waitlist"><i>⏳</i><span data-i18n="nav_waitlist">Liste d'attente</span></button>
+    <button data-view="employees"><i>♟</i><span data-i18n="nav_employees">Employés</span></button>
+    <button data-view="reports"><i>◒</i><span data-i18n="nav_reports">Rapports</span></button>
+    <button data-view="settings"><i>⚙</i><span data-i18n="nav_settings">Paramètres</span></button>
+  </nav>
+  <button class="logout" onclick="window.location.href='/logout'"><span>↪ &nbsp;<span data-i18n="logout">Déconnexion</span></span><b>↪</b></button>
+</aside>
+
+<main>
+<header class="top">
+  <div class="title"><h1 id="pageTitle" data-i18n="nav_dashboard">Tableau de bord</h1><p data-i18n="subtitle">Gestion intelligente de votre atelier</p></div>
+  <div class="top-actions">
+    <select id="langSwitch" onchange="setLang(this.value)">
+      <option value="fr">🇫🇷 Français</option>
+      <option value="en">🇬🇧 English</option>
+      <option value="es">🇪🇸 Español</option>
+    </select>
+    <button class="iconbtn">🔔</button><button class="iconbtn">▣</button><div class="user"><div class="avatar" id="companyAvatar">G</div><div><b id="companyName">Garage</b><div class="muted" data-i18n="owner_role">Propriétaire</div></div></div></div>
+</header>
+
+<section id="dashboard" class="view active">
+  <div class="stats">
+    <div class="stat"><small data-i18n="stat_today">Rendez-vous aujourd'hui</small><strong id="statToday">0</strong></div>
+    <div class="stat"><small data-i18n="stat_vehicles">Véhicules en atelier</small><strong id="statVehicles">0</strong></div>
+    <div class="stat"><small data-i18n="stat_confirmed">Rendez-vous confirmés</small><strong id="statConfirmed">0</strong></div>
+    <div class="stat"><small data-i18n="stat_revenue">Chiffre d'affaires</small><strong id="statRevenue">0 MAD</strong></div>
+  </div>
+  <div class="grid">
+    <div class="panel"><h3 data-i18n="panel_today_appts">RENDEZ-VOUS AUJOURD'HUI</h3><div id="todayList"></div><button class="primary" data-i18n="btn_new_appt" onclick="openModal()">+ NOUVEAU RENDEZ-VOUS</button></div>
+    <div class="panel"><h3 data-i18n="panel_slots">CRÉNEAUX DISPONIBLES</h3><div class="slots" id="slots"></div><button class="primary" data-i18n="btn_view_calendar" onclick="openModal()">Voir le calendrier</button></div>
+  </div>
+  <div class="bottomgrid">
+    <div class="panel"><h3 data-i18n="panel_service_breakdown">RÉPARTITION DES SERVICES</h3><div class="muted" id="serviceBreakdown" data-i18n="no_data">Aucune donnée pour le moment</div></div>
+    <div class="panel"><h3 data-i18n="panel_vehicles_shop">VÉHICULES EN ATELIER</h3><div class="muted" id="vehiclesList" data-i18n="no_vehicle">Aucun véhicule pour le moment</div></div>
+    <div class="panel"><h3 data-i18n="panel_status_breakdown">RENDEZ-VOUS PAR STATUT</h3><div class="muted" id="statusBreakdown" data-i18n="no_data">Aucune donnée pour le moment</div></div>
+  </div>
+  <div class="quick">
+    <button onclick="openModal()"><b data-i18n="quick_new_appt">＋ Nouveau rendez-vous</b><span data-i18n="quick_new_appt_desc">Créer un nouveau rendez-vous client</span></button>
+    <button onclick="showView('clients')"><b data-i18n="quick_new_client">♙ Nouveau client</b><span data-i18n="quick_new_client_desc">Ajouter un nouveau client</span></button>
+    <button onclick="showView('vehicles')"><b data-i18n="quick_new_vehicle">🚗 Nouveau véhicule</b><span data-i18n="quick_new_vehicle_desc">Enregistrer un nouveau véhicule</span></button>
+    <button onclick="showView('invoices')"><b data-i18n="quick_new_invoice">▤ Nouvelle facture</b><span data-i18n="quick_new_invoice_desc">Créer une nouvelle facture</span></button>
+  </div>
+</section>
+
+<section id="appointments" class="view"><div class="panel"><h3 data-i18n="appointments_title">RENDEZ-VOUS</h3><div style="display:flex;gap:10px;margin-bottom:12px"><button class="primary" style="margin:0" data-i18n="btn_new_appt" onclick="openModal()">+ Nouveau rendez-vous</button><a id="apptPdfLink" href="/api/appointments/pdf" style="text-decoration:none"><button class="primary" style="margin:0;background:#28a9ff" data-i18n="btn_download_pdf">⬇ Télécharger PDF</button></a></div><table class="table"><thead><tr><th data-i18n="th_date">Date</th><th data-i18n="th_time">Heure</th><th data-i18n="th_client">Client</th><th data-i18n="th_vehicle">Véhicule</th><th data-i18n="th_problem">Problème</th><th data-i18n="th_service">Service</th><th data-i18n="th_employee">Employé</th><th data-i18n="th_status">Statut</th><th></th><th></th></tr></thead><tbody id="apptTable"></tbody></table></div></section>
+<section id="agenda" class="view"><div class="panel"><h3 data-i18n="agenda_title">AGENDA — 7 prochains jours</h3><div id="agendaGrid" style="overflow-x:auto"></div></div></section>
+<section id="clients" class="view"><div class="panel"><h3 data-i18n="clients_title">CLIENTS</h3><p class="muted" style="margin-top:-6px" data-i18n="clients_hint">Cliquez sur un client pour voir son historique et créer une facture.</p><table class="table"><thead><tr><th data-i18n="th_name">Nom</th><th data-i18n="th_phone">Téléphone</th><th data-i18n="th_vehicles">Véhicule(s)</th><th data-i18n="th_last_visit">Dernière visite</th><th></th></tr></thead><tbody id="clientsTable"></tbody></table></div></section>
+
+<div class="modal" id="clientModal"><div class="modalbox" style="width:min(720px,100%)">
+  <div class="modalhead"><div><h2 style="margin:0" id="clientModalName">Client</h2><p class="muted" id="clientModalPhone"></p></div><button class="close" onclick="closeClientModal()">×</button></div>
+  <h3 style="margin:18px 0 8px" data-i18n="history_title">Historique des réparations</h3>
+  <table class="table"><thead><tr><th data-i18n="th_date">Date</th><th data-i18n="th_vehicle">Véhicule</th><th data-i18n="th_service">Service</th><th data-i18n="th_problem">Problème</th><th data-i18n="th_employee">Employé</th><th data-i18n="th_status">Statut</th><th></th></tr></thead><tbody id="clientHistoryTable"></tbody></table>
+  <h3 style="margin:20px 0 8px" data-i18n="create_invoice_for_client">Créer une facture pour ce client</h3>
+  <div class="formgrid">
+    <div class="field"><label data-i18n="label_vehicle">Véhicule</label><input id="cInvCar" placeholder="Peugeot 208"></div>
+    <div class="field"><label data-i18n="label_service">Service</label><input id="cInvService" placeholder="Vidange + Filtre"></div>
+    <div class="field"><label data-i18n="label_price_mad">Prix</label><input id="cInvPrice" type="number" placeholder="450"></div>
+  </div>
+  <button class="primary" data-i18n="btn_create_invoice" onclick="addInvoiceForClient()">+ Créer la facture</button>
+  <div id="clientInvoicesList" style="margin-top:14px"></div>
+</div></div>
+
+<div class="modal" id="apptDetailModal"><div class="modalbox" style="width:min(720px,100%)">
+  <div class="modalhead"><div><h2 style="margin:0" id="apdName">Rendez-vous</h2><p class="muted" id="apdSub"></p></div><button class="close" onclick="closeApptDetail()">×</button></div>
+
+  <h3 style="margin:16px 0 8px;font-size:14px;border-left:3px solid var(--red);padding-left:9px" data-i18n="parts_used">PIÈCES UTILISÉES</h3>
+  <div id="apdPartsList" style="margin-bottom:10px"></div>
+  <div class="formgrid">
+    <div class="field"><label data-i18n="label_part">Pièce (du stock ou libre)</label><input id="apdPartName" list="apdPartsOptions" data-i18n-ph="placeholder_part" placeholder="Ex. Filtre à huile"></div>
+    <datalist id="apdPartsOptions"></datalist>
+    <div class="field"><label data-i18n="label_qty">Quantité</label><input id="apdPartQty" type="number" value="1" min="1"></div>
+  </div>
+  <button class="primary" style="margin-top:8px" data-i18n="btn_add_part" onclick="addApdPart()">+ Ajouter la pièce</button>
+
+  <h3 style="margin:20px 0 8px;font-size:14px;border-left:3px solid var(--red);padding-left:9px" data-i18n="photos_before">PHOTOS — AVANT</h3>
+  <div id="apdPhotosBefore" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px"></div>
+  <input type="file" accept="image/*" id="apdFileBefore" onchange="uploadApdPhoto('before')">
+
+  <h3 style="margin:20px 0 8px;font-size:14px;border-left:3px solid var(--red);padding-left:9px" data-i18n="photos_after">PHOTOS — APRÈS</h3>
+  <div id="apdPhotosAfter" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px"></div>
+  <input type="file" accept="image/*" id="apdFileAfter" onchange="uploadApdPhoto('after')">
+</div></div>
+
+<section id="vehicles" class="view"><div class="panel"><h3 data-i18n="vehicles_title">VÉHICULES</h3><button class="primary" data-i18n="btn_new_vehicle" onclick="toast(t('vehicle_form_toast'))">+ Nouveau véhicule</button><table class="table"><thead><tr><th data-i18n="th_plate">Immatriculation</th><th data-i18n="th_brand_model">Marque / Modèle</th><th data-i18n="th_year">Année</th><th data-i18n="th_client">Client</th><th data-i18n="th_state">État</th></tr></thead><tbody><tr><td colspan="5" class="muted" data-i18n="no_vehicle">Aucun véhicule pour le moment</td></tr></tbody></table></div></section>
+<section id="services" class="view"><div class="panel"><h3 data-i18n="services_title">SERVICES</h3><p data-i18n="service_oil_desc">Vidange & Filtre — 45 min</p><p data-i18n="service_diag_desc">Diagnostic électronique — 60 min</p><p data-i18n="service_brake_desc">Freinage complet — 90 min</p><p data-i18n="service_revision_desc">Révision complète — 120 min</p><p data-i18n="service_clutch_desc">Embrayage — 300 min</p></div></section>
+<section id="repairs" class="view"><div class="panel"><h3 data-i18n="repairs_title">RÉPARATIONS EN COURS</h3><div class="muted" data-i18n="no_repair">Aucune réparation en cours pour le moment</div></div></section>
+<section id="invoices" class="view"><div class="panel"><h3 data-i18n="invoices_title">FACTURES</h3>
+  <p class="muted" style="margin-top:-6px"><span data-i18n="invoices_hint_pre">Astuce : gérez les factures par client depuis l'onglet</span> <b data-i18n="invoices_hint_tab">Clients</b> <span data-i18n="invoices_hint_post">pour voir l'historique complet, ou utilisez le formulaire rapide ci-dessous.</span></p>
+  <div class="field" style="margin-bottom:12px"><label data-i18n="label_existing_client">Client existant</label><select id="invClientSelect" onchange="fillInvoiceFromClient(this.value)"><option value="" data-i18n="choose_existing_client">— Choisir un client existant (ou taper un nouveau nom en bas) —</option></select></div>
+  <div class="formgrid" style="margin-bottom:14px">
+    <div class="field"><label data-i18n="th_client">Client</label><input id="invName" placeholder="Ex. Mohamed Alaoui"></div>
+    <div class="field"><label data-i18n="label_vehicle">Véhicule</label><input id="invCar" placeholder="Peugeot 208"></div>
+    <div class="field"><label data-i18n="label_service">Service</label><input id="invService" placeholder="Vidange + Filtre"></div>
+    <div class="field"><label data-i18n="label_price_mad">Prix</label><input id="invPrice" type="number" placeholder="450"></div>
+  </div>
+  <button class="primary" data-i18n="btn_create_invoice" onclick="addInvoice()">+ Créer la facture</button>
+  <table class="table" style="margin-top:16px"><thead><tr><th data-i18n="th_date">Date</th><th data-i18n="th_client">Client</th><th data-i18n="th_vehicle">Véhicule</th><th data-i18n="th_service">Service</th><th data-i18n="th_price">Prix</th><th></th></tr></thead><tbody id="invTable"></tbody></table>
+</div></section>
+<section id="stock" class="view"><div class="panel"><h3 data-i18n="stock_title">STOCK — PIÈCES DE RECHANGE</h3>
+  <div class="formgrid" style="margin-bottom:14px">
+    <div class="field"><label data-i18n="label_part_name">Nom de la pièce</label><input id="invItemName" data-i18n-ph="placeholder_part" placeholder="Ex. Filtre à huile"></div>
+    <div class="field"><label data-i18n="th_quantity">Quantité</label><input id="invItemQty" type="number" placeholder="24"></div>
+    <div class="field"><label data-i18n="label_unit">Unité</label><input id="invItemUnit" placeholder="unité(s)"></div>
+  </div>
+  <button class="primary" data-i18n="btn_add_stock" onclick="addInventoryItem()">+ Ajouter au stock</button>
+  <table class="table" style="margin-top:16px"><thead><tr><th data-i18n="th_piece">Pièce</th><th data-i18n="th_quantity">Quantité</th><th data-i18n="th_unit">Unité</th><th></th></tr></thead><tbody id="invTableStock"></tbody></table>
+</div></section>
+<section id="waitlist" class="view"><div class="panel"><h3 data-i18n="waitlist_title">LISTE D'ATTENTE</h3><p class="muted" style="margin-top:-6px" data-i18n="waitlist_hint">Clients en attente d'un créneau libre (Telegram + Dashboard).</p>
+  <div class="formgrid" style="margin:12px 0">
+    <div class="field"><label data-i18n="label_fullname">Nom complet</label><input id="wlName" placeholder="Ex. Mohamed Alaoui"></div>
+    <div class="field"><label data-i18n="th_phone">Téléphone</label><input id="wlPhone" placeholder="06 00 00 00 00"></div>
+    <div class="field"><label data-i18n="label_vehicle">Véhicule</label><input id="wlCar" placeholder="Peugeot 208"></div>
+    <div class="field"><label data-i18n="label_service">Service</label><input id="wlService" placeholder="Vidange + Filtre"></div>
+    <div class="field"><label data-i18n="label_desired_date">Date souhaitée</label><input id="wlDate" type="date"></div>
+  </div>
+  <button class="primary" data-i18n="btn_add_waitlist" onclick="addWaitlistEntry()">+ Ajouter à la liste d'attente</button>
+  <table class="table" style="margin-top:16px"><thead><tr><th data-i18n="th_client">Client</th><th data-i18n="th_phone">Téléphone</th><th data-i18n="th_vehicle">Véhicule</th><th data-i18n="th_service">Service</th><th data-i18n="th_desired_date">Date souhaitée</th><th data-i18n="th_since">Depuis</th><th></th></tr></thead><tbody id="waitlistTable"></tbody></table>
+</div></section>
+<section id="employees" class="view"><div class="panel"><h3 data-i18n="employees_title">EMPLOYÉS</h3>
+  <div class="formgrid" style="margin-bottom:14px">
+    <div class="field"><label data-i18n="label_fullname">Nom complet</label><input id="empName" placeholder="Ex. Karim Bennani"></div>
+    <div class="field"><label data-i18n="th_role">Rôle</label><input id="empRole" placeholder="Mécanicien"></div>
+    <div class="field"><label data-i18n="th_phone">Téléphone</label><input id="empPhone" placeholder="06 00 00 00 00"></div>
+    <div class="field"><label data-i18n="label_login_emp">Login employé</label><input id="empLogin" placeholder="karim"></div>
+    <div class="field"><label data-i18n="label_password_emp">Password employé</label><input id="empPassword" type="password" placeholder="Mot de passe"></div>
+  </div>
+  <button class="primary" data-i18n="btn_add_employee" onclick="addEmployee()">+ Ajouter un employé</button> <button class="primary" style="background:#28a9ff" onclick="copyEmployeeLink()">🔗 Lien espace employés</button>
+  <table class="table" style="margin-top:16px"><thead><tr><th data-i18n="th_name">Nom</th><th data-i18n="th_role">Rôle</th><th data-i18n="th_phone">Téléphone</th><th data-i18n="th_login">Login</th><th data-i18n="th_access">Accès</th><th></th></tr></thead><tbody id="empTable"></tbody></table>
+</div></section>
+<section id="reports" class="view"><div class="panel"><h3 data-i18n="reports_title">RAPPORTS</h3><p><span data-i18n="weekly_revenue">CA hebdomadaire :</span> <b id="repRevenue">0 MAD</b></p><p><span data-i18n="appts_this_week">Rendez-vous cette semaine :</span> <b id="repCount">0</b></p></div></section>
+<section id="settings" class="view">
+  <div class="panel"><h3 data-i18n="settings_title">PARAMÈTRES</h3><p data-i18n="settings_hours">Horaires : 08:00 — 19:00</p><p data-i18n="settings_buffer">Durée tampon entre rendez-vous : 15 min</p><p data-i18n="settings_notifications">Notifications : activées</p></div>
+  <div class="panel" style="margin-top:14px">
+    <h3>🔐 Sécurité du compte</h3>
+    <p class="muted">Le nom d’utilisateur est géré uniquement par le Super Admin. Vous pouvez modifier votre mot de passe ici.</p>
+    <div class="formgrid" style="margin-top:14px">
+      <div class="field"><label>Nom d’utilisateur</label><input id="companyUsernameReadonly" readonly></div>
+      <div class="field"><label>Mot de passe actuel</label><input id="companyCurrentPassword" type="password" autocomplete="current-password"></div>
+      <div class="field"><label>Nouveau mot de passe</label><input id="companyNewPassword" type="password" autocomplete="new-password"></div>
+      <div class="field"><label>Confirmer le nouveau mot de passe</label><input id="companyNewPasswordConfirm" type="password" autocomplete="new-password"></div>
+    </div>
+    <button class="primary" style="margin-top:14px;width:auto;padding:12px 18px" onclick="changeCompanyPassword()">🔑 Changer le mot de passe</button>
+  </div>
+</section>
+</main>
+</div>
+
+<div class="modal" id="modal"><div class="modalbox">
+  <div class="modalhead"><div><h2 style="margin:0" data-i18n="modal_new_appt_title">Nouveau rendez-vous</h2><p class="muted" data-i18n="modal_new_appt_sub">Ajoutez le client, son véhicule et le problème.</p></div><button class="close" onclick="closeModal()">×</button></div>
+  <div class="formgrid">
+    <div class="field"><label data-i18n="label_fullname">Nom complet</label><input id="name" placeholder="Ex. Mohamed Alaoui"></div>
+    <div class="field"><label data-i18n="th_phone">Téléphone</label><input id="phone" placeholder="06 00 00 00 00"></div>
+    <div class="field"><label data-i18n="label_brand">Marque</label><input id="brand" placeholder="Peugeot"></div>
+    <div class="field"><label data-i18n="label_model">Modèle</label><input id="model" placeholder="208"></div>
+    <div class="field"><label data-i18n="label_plate">Immatriculation</label><input id="plate" placeholder="12345 | 26"></div>
+    <div class="field"><label data-i18n="label_service_select">Service</label><select id="service"><option value="Diagnostic électronique">Diagnostic électronique</option><option value="Vidange & Filtre">Vidange & Filtre</option><option value="Freinage complet">Freinage complet</option><option value="Révision complète">Révision complète</option><option value="Autre">Autre</option></select></div>
+    <div class="field full"><label data-i18n="label_problem">Décrivez le problème</label><textarea id="problem" data-i18n-ph="placeholder_problem" placeholder="Ex. Le moteur chauffe et le voyant température s'allume..."></textarea></div>
+    <div class="field"><label data-i18n="label_employee_assigned">Employé assigné</label><select id="empSelect"><option value="">Non assigné</option></select></div>
+    <div class="field"><label data-i18n="label_date">Date</label><input id="date" type="date"></div>
+    <div class="field"><label data-i18n="label_slot">Créneau disponible</label><select id="time"><option>08:00 - 09:00</option><option>11:00 - 12:00</option><option>13:00 - 14:00</option><option>16:00 - 17:00</option></select></div>
+  </div>
+  <button class="primary" data-i18n="btn_confirm_appt" onclick="saveAppointment()">Confirmer le rendez-vous</button>
+</div></div>
+<div class="toast" id="toast"></div>
+<script>
+let company={name:"Garage",logo:"/mr-garage-logo.png",phone:"",email:"",address:"",country:"MA",currency:"MAD"};
+function money(v){const n=Number(v)||0;try{return new Intl.NumberFormat(LANG==="en"?"en-US":LANG==="es"?"es-ES":"fr-FR",{style:"currency",currency:company.currency||"MAD",maximumFractionDigits:2}).format(n)}catch{return `${n} ${company.currency||"MAD"}`}}
+function updateCurrencyUI(){const cur=company.currency||"MAD";document.querySelectorAll("[data-i18n=label_price_mad]").forEach(el=>el.textContent=(LANG==="en"?"Price":LANG==="es"?"Precio":"Prix")+" ("+cur+")");const s=document.getElementById("statRevenue"),r=document.getElementById("repRevenue");if(s&&s.textContent.includes("0"))s.textContent=money(0);if(r&&r.textContent.includes("0"))r.textContent=money(0);}
+async function loadCompany(){try{const r=await fetch("/api/company",{cache:"no-store"});if(!r.ok){if(r.status===401)location.href="/login";return;}company=await r.json();document.getElementById("logo").src=company.logo||"/mr-garage-logo.png";updateCurrencyUI();document.getElementById("companyName").textContent=company.name||"Garage";document.getElementById("companyAvatar").textContent=(company.name||"G").trim().slice(0,2).toUpperCase();const u=document.getElementById("companyUsernameReadonly");if(u)u.value=company.username||"";document.title=(company.name||"Garage")+" — MR GARAGE";}catch(e){}}
+async function changeCompanyPassword(){
+ const currentPassword=document.getElementById("companyCurrentPassword").value;
+ const newPassword=document.getElementById("companyNewPassword").value;
+ const confirmPassword=document.getElementById("companyNewPasswordConfirm").value;
+ if(!currentPassword||!newPassword||!confirmPassword){toast("⚠️ خاصك تعمر جميع الخانات");return}
+ if(newPassword.length<6){toast("⚠️ كلمة السر الجديدة خاصها تكون 6 حروف على الأقل");return}
+ if(newPassword!==confirmPassword){toast("⚠️ تأكيد كلمة السر ما مطابقش");return}
+ try{
+  const r=await fetch("/api/company/password",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({currentPassword,newPassword})});
+  const d=await r.json().catch(()=>({}));
+  if(!r.ok){
+   const msg=d.error==="CURRENT_PASSWORD_INVALID"?"❌ كلمة السر الحالية غلط":d.error==="PASSWORD_TOO_SHORT"?"⚠️ كلمة السر قصيرة بزاف":"❌ ما قدرناش نبدلو كلمة السر";
+   toast(msg);return;
+  }
+  document.getElementById("companyCurrentPassword").value="";document.getElementById("companyNewPassword").value="";document.getElementById("companyNewPasswordConfirm").value="";
+  toast("✅ تبدلات كلمة السر بنجاح");
+ }catch(e){toast("❌ مشكل فالاتصال بالسيرفر")}
+}
+let appointments=[];
+let employees=[];
+let invoices=[];
+let clients=[];
+let activeClientKey=null;
+let inventory=[];
+let waitlistItems=[];
+let activeApptId=null;
+const STATUSES=["En attente","En cours","Terminé","Annulé"];
+
+function todayISO(){ return new Date().toISOString().slice(0,10); }
+
+async function loadFromServer(){
+ try{
+  const res=await fetch("/api/appointments");
+  appointments=await res.json();
+  render();
+ }catch(e){ console.error("Impossible de charger les rendez-vous depuis le serveur",e); }
+}
+document.getElementById("apptPdfLink")?.setAttribute("href","/api/appointments/pdf?lang="+LANG);
+async function loadEmployees(){
+ try{
+  const res=await fetch("/api/employees");
+  employees=await res.json();
+  renderEmployees();
+ }catch(e){ console.error("Impossible de charger les employés",e); }
+}
+async function loadInvoices(){
+ try{
+  const res=await fetch("/api/invoices");
+  invoices=await res.json();
+  renderInvoices();
+  render();
+ }catch(e){ console.error("Impossible de charger les factures",e); }
+}
+async function loadClients(){
+ try{
+  const res=await fetch("/api/clients");
+  clients=await res.json();
+  renderClients();
+  renderInvoiceClientOptions();
+ }catch(e){ console.error("Impossible de charger les clients",e); }
+}
+async function loadInventory(){
+ try{
+  const res=await fetch("/api/inventory");
+  inventory=await res.json();
+  renderInventory();
+ }catch(e){ console.error("Impossible de charger le stock",e); }
+}
+async function loadWaitlist(){
+ try{
+  const res=await fetch("/api/waitlist");
+  waitlistItems=await res.json();
+  renderWaitlist();
+ }catch(e){ console.error("Impossible de charger la liste d'attente",e); }
+}
+function renderInventory(){
+ document.getElementById("invTableStock").innerHTML=inventory.map(i=>`<tr><td>${i.name}</td><td>${i.qty}</td><td>${i.unit}</td><td><button onclick="deleteInventoryItem(${i.id})" style="background:none;border:0;color:#ff3038;cursor:pointer">✕</button></td></tr>`).join("")||`<tr><td colspan="4" class="muted">${t('no_item_stock')}</td></tr>`;
+}
+async function addInventoryItem(){
+ const name=document.getElementById("invItemName").value.trim(), qty=document.getElementById("invItemQty").value, unit=document.getElementById("invItemUnit").value.trim()||"unité(s)";
+ if(!name){toast(t('toast_fill_part_name'));return}
+ try{
+  await fetch("/api/inventory",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({name,qty,unit})});
+  document.getElementById("invItemName").value="";document.getElementById("invItemQty").value="";document.getElementById("invItemUnit").value="";
+  await loadInventory();
+  toast(t('toast_item_added_stock'));
+ }catch(e){ toast(t('toast_connection_error')); }
+}
+async function deleteInventoryItem(id){
+ try{ await fetch("/api/inventory/"+id,{method:"DELETE"}); await loadInventory(); }catch(e){ toast(t('toast_connection_error')); }
+}
+function renderWaitlist(){
+ document.getElementById("waitlistTable").innerHTML=waitlistItems.map(w=>`<tr><td>${w.name}</td><td>${w.phone||"-"}</td><td>${w.car}</td><td>${w.service?serviceLabel(w.service):"-"}</td><td>${w.preferredDate||"-"}</td><td>${w.createdAt||"-"}</td><td><button onclick="deleteWaitlistEntry(${w.id})" style="background:none;border:0;color:#ff3038;cursor:pointer">✕</button></td></tr>`).join("")||`<tr><td colspan="7" class="muted">${t('no_waitlist')}</td></tr>`;
+}
+async function addWaitlistEntry(){
+ const name=document.getElementById("wlName").value.trim(), phone=document.getElementById("wlPhone").value.trim(), car=document.getElementById("wlCar").value.trim(), service=document.getElementById("wlService").value.trim(), preferredDate=document.getElementById("wlDate").value;
+ if(!name||!car){toast(t('toast_fill_name_vehicle_wl'));return}
+ try{
+  await fetch("/api/waitlist",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({name,phone,car,service,preferredDate})});
+  document.getElementById("wlName").value="";document.getElementById("wlPhone").value="";document.getElementById("wlCar").value="";document.getElementById("wlService").value="";document.getElementById("wlDate").value="";
+  await loadWaitlist();
+  toast(t('toast_added_waitlist'));
+ }catch(e){ toast(t('toast_connection_error')); }
+}
+async function deleteWaitlistEntry(id){
+ try{ await fetch("/api/waitlist/"+id,{method:"DELETE"}); await loadWaitlist(); }catch(e){ toast(t('toast_connection_error')); }
+}
+// تحديث تلقائي كل 5 ثواني باش تبان المواعيد الجداد
+setInterval(()=>{ loadFromServer(); loadClients(); loadWaitlist(); },5000);
+
+async function assignEmployee(id,empId){
+ try{
+  const emp=employees.find(e=>String(e.id)===String(empId)); await fetch("/api/appointments/"+id,{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({employee:emp?emp.name:"",employeeId:emp?emp.id:null})});
+  await loadFromServer();
+ }catch(e){ toast(t('toast_connection_error')); }
+}
+async function updateStatus(id,status){
+ try{
+  await fetch("/api/appointments/"+id,{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({status})});
+  await loadFromServer();
+ }catch(e){ toast(t('toast_connection_error')); }
+}
+
+function empOptions(selected){
+ const selectedEmp=employees.find(e=>e.name===selected || String(e.id)===String(selected));
+ const selectedId=selectedEmp?String(selectedEmp.id):String(selected||'');
+ return `<option value="">${t('unassigned')}</option>`+employees.map(e=>`<option value="${e.id}" ${String(e.id)===selectedId?'selected':''}>${e.name}</option>`).join("");
+}
+function statusOptions(selected){
+ return STATUSES.map(s=>`<option value="${s}" ${s===selected?'selected':''}>${statusLabel(s)}</option>`).join("");
+}
+function statusBadgeClass(s){
+ if(s==='En cours') return 'blue';
+ if(s==='En attente') return 'yellow';
+ if(s==='Annulé') return '';
+ return '';
+}
+
+function renderAgenda(){
+ const el=document.getElementById("agendaGrid");
+ if(!el) return;
+ const days=[];
+ for(let i=0;i<7;i++){ const d=new Date(); d.setDate(d.getDate()+i); days.push(d); }
+ const SLOTS=["09:00","10:30","12:00","14:00","15:30","17:00"];
+ let html='<table class="table"><thead><tr><th>Heure</th>'+days.map(d=>`<th>${d.toLocaleDateString("fr-FR",{weekday:"short",day:"2-digit",month:"2-digit"})}</th>`).join("")+'</tr></thead><tbody>';
+ SLOTS.forEach(slot=>{
+  html+=`<tr><td class="time">${slot}</td>`;
+  days.forEach(d=>{
+   const iso=d.toISOString().slice(0,10);
+   const appt=appointments.find(a=>a.date===iso&&a.time===slot);
+   if(appt) html+=`<td><span class="badge ${statusBadgeClass(appt.status)}" style="justify-self:start">${appt.name}</span></td>`;
+   else html+=`<td class="muted">${t('free_slot')}</td>`;
+  });
+  html+='</tr>';
+ });
+ html+='</tbody></table>';
+ el.innerHTML=html;
+}
+
+function render(){
+ const today=todayISO();
+ const todays=appointments.filter(a=>(a.date||today)===today);
+ document.getElementById("todayList").innerHTML=todays.map(a=>`<div class="row"><div class="time">${a.time}</div><div><b>${a.name}</b><div class="muted">${a.car}</div></div><div>${serviceLabel(a.service)}<div class="muted">${t('label_service')}</div></div><div class="badge ${statusBadgeClass(a.status)}">${statusLabel(a.status)}</div><div>⋮</div></div>`).join("")||`<div class="muted">${t('no_appt')}</div>`;
+ document.getElementById("apptTable").innerHTML=appointments.map(a=>`<tr><td class="time">${a.date||today}</td><td class="time">${a.time}</td><td>${a.name}</td><td>${a.car}</td><td>${a.issue||"-"}</td><td>${serviceLabel(a.service)}</td><td><select onchange="assignEmployee(${a.id},this.value)">${empOptions(a.employee)}</select></td><td><select onchange="updateStatus(${a.id},this.value)">${statusOptions(a.status)}</select></td><td><button onclick="openApptDetail(${a.id})" style="background:#2a3035;border:0;color:#fff;padding:6px 10px;border-radius:6px;cursor:pointer">📷 ${t('th_action')}</button></td><td><a href="/api/appointments/${a.id}/pdf?lang=${LANG}"><button style="background:#28a9ff;border:0;color:#fff;padding:6px 10px;border-radius:6px;cursor:pointer">PDF</button></a></td></tr>`).join("")||`<tr><td colspan="10" class="muted">${t('no_appt')}</td></tr>`;
+
+ renderClients();
+
+ document.getElementById("statToday").textContent=todays.length;
+ document.getElementById("statConfirmed").textContent=appointments.filter(a=>a.status=='En cours'||a.status=='Terminé').length;
+ document.getElementById("statVehicles").textContent=new Set(appointments.map(a=>a.car)).size;
+ const totalRevenue=invoices.reduce((s,i)=>s+(Number(i.price)||0),0);
+ document.getElementById("statRevenue").textContent=money(totalRevenue);
+ document.getElementById("repCount").textContent=appointments.length;
+ const weekAgo=new Date(); weekAgo.setDate(weekAgo.getDate()-7);
+ const weekRevenue=invoices.filter(i=>new Date(i.date)>=weekAgo).reduce((s,i)=>s+(Number(i.price)||0),0);
+ document.getElementById("repRevenue").textContent=money(weekRevenue);
+
+ const services={};
+ appointments.forEach(a=>{ services[a.service]=(services[a.service]||0)+1; });
+ const svcKeys=Object.keys(services);
+ document.getElementById("serviceBreakdown").textContent=svcKeys.length?svcKeys.map(s=>`${serviceLabel(s)} (${services[s]})`).join(" · "):t('no_data');
+
+ const statuses={};
+ appointments.forEach(a=>{ statuses[a.status]=(statuses[a.status]||0)+1; });
+ const stKeys=Object.keys(statuses);
+ document.getElementById("statusBreakdown").innerHTML=stKeys.length?stKeys.map(s=>`<p>${statusLabel(s)} — ${statuses[s]}</p>`).join(""):t('no_data');
+
+ const cars=[...new Set(appointments.map(a=>a.car))];
+ document.getElementById("vehiclesList").innerHTML=cars.length?cars.map(c=>`<p>🚗 ${c}</p>`).join(""):t('no_vehicle');
+
+ renderAgenda();
+}
+
+function renderEmployees(){
+ document.getElementById("empTable").innerHTML=employees.map(e=>`<tr><td>${e.name}</td><td>${e.role||"-"}</td><td>${e.phone||"-"}</td><td>${e.login||"-"}</td><td>${e.hasPassword?t('access_active'):t('access_not_configured')}</td><td><button onclick="editEmployee(${e.id})" style="background:none;border:0;color:#28a9ff;cursor:pointer">${t('btn_edit')}</button><button onclick="deleteEmployee(${e.id})" style="background:none;border:0;color:#ff3038;cursor:pointer">✕</button></td></tr>`).join("")||`<tr><td colspan="6" class="muted">${t('no_employee')}</td></tr>`;
+ const sel=document.getElementById("empSelect"); if(sel) sel.innerHTML=empOptions("");
+}
+const ERR_MSG={MISSING_FIELDS:'err_missing_fields',LOGIN_TAKEN:'err_login_taken'};
+function mapErr(code){ return code && ERR_MSG[code] ? t(ERR_MSG[code]) : (code || t('toast_error')); }
+async function copyEmployeeLink(){try{const r=await fetch("/api/company/employee-link");const d=await r.json();if(!r.ok)throw new Error();await navigator.clipboard.writeText(d.url);toast("تم نسخ رابط دخول الموظفين");}catch(e){try{const r=await fetch("/api/company/employee-link");const d=await r.json();prompt("رابط دخول الموظفين:",d.url||"");}catch{toast(t("toast_connection_error"));}}}
+async function addEmployee(){
+ const name=document.getElementById("empName").value.trim(), role=document.getElementById("empRole").value.trim(), phone=document.getElementById("empPhone").value.trim(), login=document.getElementById("empLogin").value.trim(), password=document.getElementById("empPassword").value;
+ if(!name||!login||!password){toast(t('toast_fill_name_login_pass'));return}
+ try{ const r=await fetch("/api/employees",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({name,role,phone,login,password})}); const d=await r.json(); if(!r.ok){toast(mapErr(d.error));return}
+  ["empName","empRole","empPhone","empLogin","empPassword"].forEach(id=>document.getElementById(id).value=""); await loadEmployees(); toast(t('toast_employee_added'));
+ }catch(e){toast(t('toast_connection_error'))}
+}
+async function editEmployee(id){
+ const e=employees.find(x=>x.id===id); if(!e)return;
+ const name=prompt(t('prompt_fullname'),e.name); if(name===null)return;
+ const role=prompt(t('prompt_role'),e.role||""); if(role===null)return;
+ const phone=prompt(t('prompt_phone'),e.phone||""); if(phone===null)return;
+ const password=prompt(t('prompt_new_password'),""); if(password===null)return;
+ try{const r=await fetch("/api/employees/"+id,{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({name,role,phone,...(password?{password}: {})})});const d=await r.json();if(!r.ok){toast(mapErr(d.error));return}await loadEmployees();toast(t('toast_employee_updated'))}catch(e){toast(t('toast_connection_error'))}
+}
+async function deleteEmployee(id){
+ if(!confirm(t('confirm_delete_employee')))return;
+ try{const r=await fetch("/api/employees/"+id,{method:"DELETE"});if(r.ok)await loadEmployees();else toast(t('toast_error'))}catch(e){toast(t('toast_connection_error'))}
+}
+
+function renderClients(){
+ const tbody=document.getElementById("clientsTable");
+ if(!tbody) return;
+ tbody.innerHTML=clients.map(c=>`<tr style="cursor:pointer" onclick="openClientModal('${(c.phone||c.name).replace(/'/g,"\\'")}')"><td>${c.name}</td><td>${c.phone||"-"}</td><td>${c.cars.join(", ")||"-"}</td><td>${c.lastVisit||"-"}</td><td><button style="background:none;border:0;color:#28a9ff;cursor:pointer">${t('view_btn')}</button></td></tr>`).join("")||`<tr><td colspan="5" class="muted">${t('no_client')}</td></tr>`;
+}
+
+function openClientModal(key){
+ const c=clients.find(x=>(x.phone||x.name)===key);
+ if(!c) return;
+ activeClientKey=key;
+ document.getElementById("clientModalName").textContent=c.name;
+ document.getElementById("clientModalPhone").textContent=c.phone||t('no_phone_registered');
+ document.getElementById("clientHistoryTable").innerHTML=c.history.map(h=>`<tr><td>${h.date} ${h.time||""}</td><td>${h.car}</td><td>${serviceLabel(h.service)}</td><td>${h.issue||"-"}</td><td>${h.employee||"-"}</td><td>${statusLabel(h.status)}</td><td><a href="/api/appointments/${h.id}/pdf?lang=${LANG}"><button style="background:#28a9ff;border:0;color:#fff;padding:6px 10px;border-radius:6px;cursor:pointer">PDF</button></a></td></tr>`).join("")||`<tr><td colspan="7" class="muted">${t('no_history')}</td></tr>`;
+ document.getElementById("cInvCar").value=c.cars[0]||"";
+ document.getElementById("cInvService").value="";
+ document.getElementById("cInvPrice").value="";
+ renderClientInvoices(c);
+ document.getElementById("clientModal").classList.add("show");
+}
+function closeClientModal(){ document.getElementById("clientModal").classList.remove("show"); activeClientKey=null; }
+
+// ---- Détails du rendez-vous : pièces utilisées + photos avant/après ----
+function openApptDetail(id){
+ activeApptId=id;
+ const a=appointments.find(x=>x.id===id);
+ if(!a) return;
+ document.getElementById("apdName").textContent=a.name+" — "+a.car;
+ document.getElementById("apdSub").textContent=(a.date||"")+" • "+(a.time||"")+" • "+a.service;
+ document.getElementById("apdPartsOptions").innerHTML=inventory.map(i=>`<option value="${i.name}">`).join("");
+ renderApdParts(a);
+ renderApdPhotos(a);
+ document.getElementById("apptDetailModal").classList.add("show");
+}
+function closeApptDetail(){ document.getElementById("apptDetailModal").classList.remove("show"); activeApptId=null; }
+function renderApdParts(a){
+ const parts=a.parts||[];
+ document.getElementById("apdPartsList").innerHTML=parts.length?parts.map((p,i)=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-top:1px solid #24292d"><span>${p.name} × ${p.qty}</span><button onclick="removeApdPart(${i})" style="background:none;border:0;color:#ff3038;cursor:pointer">✕</button></div>`).join(""):`<div class="muted">${t('no_part_added')}</div>`;
+}
+async function addApdPart(){
+ const name=document.getElementById("apdPartName").value.trim(), qty=document.getElementById("apdPartQty").value||1;
+ if(!name){toast(t('toast_fill_part_name'));return}
+ try{
+  const res=await fetch("/api/appointments/"+activeApptId+"/parts",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({name,qty})});
+  const appt=await res.json();
+  const idx=appointments.findIndex(x=>x.id===activeApptId); if(idx>-1) appointments[idx]=appt;
+  document.getElementById("apdPartName").value="";document.getElementById("apdPartQty").value="1";
+  renderApdParts(appt);
+  await loadInventory();
+ }catch(e){ toast(t('toast_connection_error')); }
+}
+async function removeApdPart(index){
+ try{
+  const res=await fetch("/api/appointments/"+activeApptId+"/parts/"+index,{method:"DELETE"});
+  const appt=await res.json();
+  const idx=appointments.findIndex(x=>x.id===activeApptId); if(idx>-1) appointments[idx]=appt;
+  renderApdParts(appt);
+ }catch(e){ toast(t('toast_connection_error')); }
+}
+function renderApdPhotos(a){
+ const before=a.photosBefore||[], after=a.photosAfter||[];
+ const thumb=(url,type)=>`<div style="position:relative"><img src="${url}" style="width:90px;height:90px;object-fit:cover;border-radius:8px;border:1px solid #30363b"><button onclick="removeApdPhoto('${type}','${url}')" style="position:absolute;top:-6px;right:-6px;background:#ef2029;border:0;color:#fff;border-radius:50%;width:20px;height:20px;cursor:pointer;font-size:12px;line-height:1">✕</button></div>`;
+ document.getElementById("apdPhotosBefore").innerHTML=before.map(u=>thumb(u,"before")).join("")||`<div class="muted">${t('no_photo')}</div>`;
+ document.getElementById("apdPhotosAfter").innerHTML=after.map(u=>thumb(u,"after")).join("")||`<div class="muted">${t('no_photo')}</div>`;
+}
+async function uploadApdPhoto(type){
+ const input=document.getElementById(type==="after"?"apdFileAfter":"apdFileBefore");
+ const file=input.files[0];
+ if(!file) return;
+ const fd=new FormData(); fd.append("photo",file); fd.append("type",type);
+ try{
+  const res=await fetch("/api/appointments/"+activeApptId+"/photos",{method:"POST",body:fd});
+  const appt=await res.json();
+  const idx=appointments.findIndex(x=>x.id===activeApptId); if(idx>-1) appointments[idx]=appt;
+  renderApdPhotos(appt);
+  input.value="";
+  toast(t('toast_photo_added'));
+ }catch(e){ toast(t('toast_connection_error')); }
+}
+async function removeApdPhoto(type,url){
+ try{
+  const res=await fetch("/api/appointments/"+activeApptId+"/photos",{method:"DELETE",headers:{"Content-Type":"application/json"},body:JSON.stringify({type,url})});
+  const appt=await res.json();
+  const idx=appointments.findIndex(x=>x.id===activeApptId); if(idx>-1) appointments[idx]=appt;
+  renderApdPhotos(appt);
+ }catch(e){ toast(t('toast_connection_error')); }
+}
+
+function renderClientInvoices(c){
+ const list=invoices.filter(i=>i.name===c.name);
+ document.getElementById("clientInvoicesList").innerHTML=list.length? `<h4 style="margin:8px 0">${t('client_invoices_title')}</h4>`+list.map(i=>`<div style="display:flex;gap:12px;align-items:center;padding:10px 6px;border-top:1px solid #24292d"><div style="width:90px" class="muted">${i.date}</div><div style="flex:1">${i.car} — ${serviceLabel(i.service)}</div><div style="width:90px">${money(i.price)}</div><a href="/api/invoices/${i.id}/pdf?lang=${LANG}"><button style="background:#28a9ff;border:0;color:#fff;padding:6px 10px;border-radius:6px;cursor:pointer">${t('btn_download')}</button></a></div>`).join("") : "";
+}
+
+async function addInvoiceForClient(){
+ const c=clients.find(x=>(x.phone||x.name)===activeClientKey);
+ if(!c){toast(t('toast_choose_client'));return}
+ const car=document.getElementById("cInvCar").value.trim(), service=document.getElementById("cInvService").value.trim(), price=document.getElementById("cInvPrice").value;
+ if(!car||!price){toast(t('toast_fill_vehicle_price'));return}
+ try{
+  await fetch("/api/invoices",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({name:c.name,phone:c.phone,car,service,price})});
+  document.getElementById("cInvService").value="";document.getElementById("cInvPrice").value="";
+  await loadInvoices();
+  renderClientInvoices(clients.find(x=>(x.phone||x.name)===activeClientKey)||c);
+  toast(t('toast_invoice_created'));
+ }catch(e){ toast(t('toast_connection_error')); }
+}
+
+function renderInvoiceClientOptions(){
+ const sel=document.getElementById("invClientSelect");
+ if(!sel) return;
+ sel.innerHTML=`<option value="">${t('choose_existing_client')}</option>`+clients.map(c=>`<option value="${(c.phone||c.name)}">${c.name}${c.phone?" — "+c.phone:""}</option>`).join("");
+}
+function fillInvoiceFromClient(key){
+ const c=clients.find(x=>(x.phone||x.name)===key);
+ if(!c) return;
+ document.getElementById("invName").value=c.name;
+ document.getElementById("invCar").value=c.cars[0]||"";
+}
+
+function renderInvoices(){
+ document.getElementById("invTable").innerHTML=invoices.map(i=>`<tr><td>${i.date}</td><td>${i.name}</td><td>${i.car}</td><td>${serviceLabel(i.service)}</td><td>${money(i.price)}</td><td style="display:flex;gap:8px"><a href="/api/invoices/${i.id}/pdf?lang=${LANG}"><button style="background:#28a9ff;border:0;color:#fff;padding:6px 10px;border-radius:6px;cursor:pointer">PDF</button></a><button onclick="deleteInvoice(${i.id})" style="background:none;border:0;color:#ff3038;cursor:pointer">✕</button></td></tr>`).join("")||`<tr><td colspan="6" class="muted">${t('no_invoice')}</td></tr>`;
+}
+async function addInvoice(){
+ const name=document.getElementById("invName").value.trim(), car=document.getElementById("invCar").value.trim(), service=document.getElementById("invService").value.trim(), price=document.getElementById("invPrice").value;
+ if(!name||!car||!price){toast(t('toast_fill_name_vehicle_price'));return}
+ try{
+  await fetch("/api/invoices",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({name,car,service,price})});
+  document.getElementById("invName").value="";document.getElementById("invCar").value="";document.getElementById("invService").value="";document.getElementById("invPrice").value="";
+  await loadInvoices();
+  toast(t('toast_invoice_created_short'));
+ }catch(e){ toast(t('toast_connection_error')); }
+}
+async function deleteInvoice(id){
+ try{
+  await fetch("/api/invoices/"+id,{method:"DELETE"});
+  await loadInvoices();
+ }catch(e){ toast(t('toast_connection_error')); }
+}
+
+loadCompany().then(()=>{loadFromServer();loadEmployees();loadInvoices();loadClients();loadInventory();loadWaitlist();});
+function showView(id){document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));document.getElementById(id).classList.add("active");document.querySelectorAll(".nav button").forEach(b=>b.classList.toggle("active",b.dataset.view===id));document.getElementById("pageTitle").textContent=document.querySelector(`[data-view="${id}"] span`).textContent}
+document.querySelectorAll(".nav button").forEach(b=>b.onclick=()=>showView(b.dataset.view));
+function openModal(){document.getElementById("modal").classList.add("show");document.getElementById("date").value=todayISO();document.getElementById("date").min=todayISO();document.getElementById("empSelect").innerHTML=empOptions("")}
+function closeModal(){document.getElementById("modal").classList.remove("show")}
+async function saveAppointment(){
+ const name=document.getElementById("name").value.trim(), phone=document.getElementById("phone").value.trim(), brand=document.getElementById("brand").value.trim(), model=document.getElementById("model").value.trim(), service=document.getElementById("service").value, time=document.getElementById("time").value, date=document.getElementById("date").value||todayISO(), issue=document.getElementById("problem").value.trim(), employeeId=document.getElementById("empSelect").value, employeeObj=employees.find(e=>String(e.id)===String(employeeId)), employee=employeeObj?employeeObj.name:"";
+ if(!name||!brand||!model){toast(t('toast_fill_name_vehicle'));return}
+ try{
+  await fetch("/api/appointments",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({name,phone,car:brand+" "+model,service,time:time.split(" ")[0],date,issue,employee,employeeId:employeeObj?employeeObj.id:null,status:"En attente"})});
+  await loadFromServer();
+  await loadClients();
+ }catch(e){ toast(t('toast_connection_error')); return; }
+ closeModal();showView("dashboard");toast(t('toast_appt_confirmed'));
+}
+function toast(msg){const el=document.getElementById("toast");el.textContent=msg;el.classList.add("show");setTimeout(()=>el.classList.remove("show"),2800)}
+function renderSlots(){
+ document.getElementById("slots").innerHTML=["08:00 - 09:00","11:00 - 12:00","13:00 - 14:00","16:00 - 17:00","18:00 - 19:00"].map((s,i)=>`<div class="slot"><span>${s}</span><b class="${i===4?'limited':'available'}">${i===4?t('slot_limited'):t('slot_available')}</b></div>`).join("");
+}
+renderSlots();
+
+// ---- i18n : changement de langue instantané ----
+function onLangChange(){
+ applyI18nDom(document);
+ document.title=(company.name||"Garage")+" — MR GARAGE";
+ document.getElementById("apptPdfLink")?.setAttribute("href","/api/appointments/pdf?lang="+LANG);
+ const activeBtn=document.querySelector(".nav button.active span");
+ if(activeBtn) document.getElementById("pageTitle").textContent=activeBtn.textContent;
+ render();
+ renderEmployees();
+ renderInvoices();
+ renderClients();
+ renderInvoiceClientOptions();
+ renderInventory();
+ renderWaitlist();
+ renderAgenda();
+ renderSlots();
+ const empSel=document.getElementById("empSelect"); if(empSel) empSel.innerHTML=empOptions(empSel.value);
+}
+applyI18nDom(document);
+document.title=(company.name||"Garage")+" — MR GARAGE";
+</script>
+</body></html>
